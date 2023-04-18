@@ -21,7 +21,7 @@ sudo apt install inotify-tools ffmpeg
 
 
 ``` sh
-curl -o dynamic-folders-video-optimizer https://raw.githubusercontent.com/tanrax/dynamic-folders/main/dynamic-folder-video-optimizer.sh && chmod +x dynamic-folders-video-optimizer && sudo mv dynamic-folders-video-optimizer /usr/local/bin
+curl -o dynamic-folders-video-optimizer https://raw.githubusercontent.com/tanrax/dynamic-folders/main/dynamic-folders-video-optimizer.sh && chmod +x dynamic-folders-video-optimizer && sudo mv dynamic-folders-video-optimizer /usr/local/bin
 ```
 
 ### Run
