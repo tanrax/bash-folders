@@ -6,10 +6,7 @@
 # Requirements: Install inotify-tools and ffmpeg
 # Example Debian: $sudo apt install inotify-tools ffmpeg
 # --
-# Activate a service
 # Cron: @reboot dynamic-video-to-mp4.sh >/dev/null 2>&1 &
-# or create a service:
-# $sudo nano /etc/systemd/system/dynamic-video-to-mp4.service
 # --
 
 # START
