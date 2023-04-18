@@ -92,7 +92,7 @@ crontab -e
 Add to document.
 
 ``` sh
-@reboot dynamic-video-to-mp4.sh >/dev/null 2>&1 &
+@reboot dynamic-folders-video-optimizer >/dev/null 2>&1 &
 ```
 
 ## Development
