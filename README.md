@@ -39,7 +39,7 @@ dynamic-folders-video-optimizer --folder [folder to watch]
 Example.
 
 ``` sh
-mkdir optmizer
+mkdir optimizer
 dynamic-folders-video-optimizer --folder optimizer
 ```
 
