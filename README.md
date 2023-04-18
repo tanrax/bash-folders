@@ -45,7 +45,9 @@ dynamic-folders-video-optimizer --folder optimizer
 
 And leave a video that you want to optimize in the folder `optimizer`.
 
-### Service
+### Start at operating system startup
+
+#### Option 1: Service
 
 Create a file in `/etc/systemd/system/dynamic-folders-video-optimizer.service` with the following content.
 
@@ -79,7 +81,7 @@ sudo systemctl enable dynamic-folders-video-optimizer
 sudo systemctl start dynamic-folders-video-optimizer
 ```
 
-### Cron
+#### Option 2: Cron
 
 Open.
 
