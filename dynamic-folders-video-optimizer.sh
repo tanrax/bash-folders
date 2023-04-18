@@ -52,7 +52,7 @@ send-notification() {
 
 start() {
     # Monitors the selected folder
-    inotifywait -m -e create --format '%f' "$FOLDER_ORIGIN" |
+    inotifywait -m -e create,moved_to --format '%f' "$FOLDER_ORIGIN" |
 	while read -r filename; do
 	    # Gets the file extension
 	    extension="${filename##*.}"

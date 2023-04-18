@@ -6,9 +6,6 @@ Collection of Bash scripts that execute functionalities in folders.
 
 Folder that watches when new videos are added and optimizes them.
 
-For security, it **only detects files that have been copied! Ignore moved files**.
-
-
 ### Requirements
 
 - `inotify-tools`
