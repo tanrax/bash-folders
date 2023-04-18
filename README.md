@@ -58,8 +58,6 @@ Description=Folder that watches when new videos are added to a folder and optimi
 Restart=always
 RestartSec=5
 User=[user]
-Group=[user]
-WorkingDirectory=/home/[user]
 ExecStart=dynamic-folders-video-optimizer --folder [folder to watch]
 
 [Install]

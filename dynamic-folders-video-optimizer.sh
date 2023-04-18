@@ -12,6 +12,10 @@
 # START
 set -e
 
+# EXPORTS
+# Fix: notify-send command doesn't launch the notification through systemd service
+export DBUS_SESSION_BUS_ADDRESS="${DBUS_SESSION_BUS_ADDRESS:-unix:path=/run/user/${UID}/bus}"
+
 # VARIABLES
 PROGNAME=$(basename "$0")
 FOLDER_ORIGIN="$2"
