@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # --
-# Description: Script that watches when new videos are added to a folder and optimizes them to mp4 for Web.
+# Description: Script that watches when new videos are added to a folder and optimizes them.
 # --
 # Requirements: Install inotify-tools and ffmpeg
 # Example Debian: $sudo apt install inotify-tools ffmpeg
@@ -29,7 +29,7 @@ usage() {
 
     cat << EOF
 Usage: $PROGNAME [OPTION]
-Watches when new videos are added to a folder and optimizes them to mp4 for Web.
+Watches when new videos are added to a folder and optimizes them.
 Options:
 --folder [path]  Folder path where new video will be monitored and optimized
 --help           Display this usage message and exit

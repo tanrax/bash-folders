@@ -2,32 +2,47 @@
 
 Collection of Bash scripts that execute functionalities in folders.
 
-## Video to mp4
+## Video optmizer
+
+Folder that watches when new videos are added to a folder and optimizes them.
+
+### Requirements
+
+- `inotify-tools`
+- `ffmpeg`
+
+Example in Debian.
+
+``` sh
+sudo apt install inotify-tools ffmpeg
+```
 
 ### Install
 
+
+``` sh
+curl -o dynamic-folders-video-optimizer https://raw.githubusercontent.com/tanrax/dynamic-folders/main/dynamic-folders-video-optimizer.sh && chmod +x dynamic-folders-video-optimizer && sudo mv dynamic-folders-video-optimizer /usr/local/bin
+```
+
 ### Run
+
+``` sh
+dynamic-folders-video-optimizer [folder to watch]
+```
 
 ### Service
 
-```sh
-wget /etc/systemd/system/github-runner-glosa.service
-curl -o maza https://raw.githubusercontent.com/tanrax/maza-ad-blocking/master/maza && chmod +x maza && sudo mv maza /usr/local/bin
-```
-
 ```ini
 [Unit]
-Description=Github runner glosa
-After=network.target
+Description=Folder that watches when new videos are added to a folder and optimizes them.
 
 [Service]
 Restart=always
 RestartSec=5
-User=github
-Group=github
-Restart=always
-WorkingDirectory=/home/github/actions-runner
-ExecStart=/home/user/
+User=[user]
+Group=[user]
+WorkingDirectory=/home/[user]
+ExecStart=dynamic-folders-video-optimizer [folder to watch]
 
 [Install]
 WantedBy=multi-user.target
