@@ -6,7 +6,7 @@
 # Requirements: Install inotify-tools and ffmpeg
 # Example Debian: $sudo apt install inotify-tools ffmpeg
 # --
-# Cron: @reboot dynamic-folders-video-optimizer.sh >/dev/null 2>&1 &
+# Cron: @reboot bash-folders-video-optimizer.sh >/dev/null 2>&1 &
 # --
 
 # START
