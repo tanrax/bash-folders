@@ -51,6 +51,8 @@ send-notification() {
 }
 
 start() {
+    # Output
+    cd "$FOLDER_ORIGIN"
     # Monitors the selected folder
     inotifywait -m -e create,moved_to --format '%f' "$FOLDER_ORIGIN" |
 	while read -r filename; do
