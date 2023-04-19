@@ -1,8 +1,13 @@
-# Dynamic folders
+# Bash folders
 
-Collection of Bash scripts that execute functionalities in folders.
+Collection of Bash scripts to execute functionalities in folders, such as optimizing videos, unzipping files, converting images, etc.
 
-## Video optmizer
+- [Video optimizer](#video-optimizer)
+- [Decompress files](#decompress-files)
+
+---
+
+## Video optimizer
 
 Folder that watches when new videos are added and optimizes them.
 
@@ -21,26 +26,26 @@ sudo apt install inotify-tools ffmpeg
 
 
 ``` sh
-curl -o dynamic-folders-video-optimizer https://raw.githubusercontent.com/tanrax/dynamic-folders/main/dynamic-folders-video-optimizer.sh && chmod +x dynamic-folders-video-optimizer && sudo mv dynamic-folders-video-optimizer /usr/local/bin && echo "🎉 Successfully installed! 🎉"
+curl -o bash-folders-video-optimizer https://raw.githubusercontent.com/tanrax/bash-folders/main/bash-folders-video-optimizer.sh && chmod +x bash-folders-video-optimizer && sudo mv bash-folders-video-optimizer /usr/local/bin && echo "🎉 Successfully installed! 🎉"
 ```
 
 Test
 
 ``` sh
-dynamic-folders-video-optimizer --help
+bash-folders-video-optimizer --help
 ```
 
 ### Run
 
 ``` sh
-dynamic-folders-video-optimizer --folder [folder to watch]
+bash-folders-video-optimizer --folder [folder to watch]
 ```
 
 Example.
 
 ``` sh
 mkdir optimizer
-dynamic-folders-video-optimizer --folder optimizer
+bash-folders-video-optimizer --folder optimizer
 ```
 
 And leave a video that you want to optimize in the folder `optimizer`.
@@ -49,7 +54,7 @@ And leave a video that you want to optimize in the folder `optimizer`.
 
 #### Option 1: Service
 
-Create a file in `/etc/systemd/system/dynamic-folders-video-optimizer.service` with the following content.
+Create a file in `/etc/systemd/system/bash-folders-video-optimizer.service` with the following content.
 
 
 ```ini
@@ -60,7 +65,7 @@ Description=Folder that watches when new videos are added and optimizes them.
 Restart=always
 RestartSec=5
 User=[user]
-ExecStart=dynamic-folders-video-optimizer --folder [folder to watch]
+ExecStart=bash-folders-video-optimizer --folder [folder to watch]
 
 [Install]
 WantedBy=multi-user.target
@@ -77,8 +82,8 @@ sudo systemctl daemon-reload
 And activate it.
 
 ``` sh
-sudo systemctl enable dynamic-folders-video-optimizer
-sudo systemctl start dynamic-folders-video-optimizer
+sudo systemctl enable bash-folders-video-optimizer
+sudo systemctl start bash-folders-video-optimizer
 ```
 
 #### Option 2: Cron
@@ -92,8 +97,10 @@ crontab -e
 Add to document.
 
 ``` sh
-@reboot dynamic-folders-video-optimizer --folder [folder to watch] >/dev/null 2>&1 &
+@reboot bash-folders-video-optimizer --folder [folder to watch] >/dev/null 2>&1 &
 ```
+
+---
 
 ## Development
 
