@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 
 # --
-# Description: Script that watches when new videos are added to a folder and optimizes them.
+# Description: Script that decompresses all the files that are left in the folder.
+# --nnnnnnn
+# Requirements: Install inotify-tools, gzip bzip2 xz-utils unzip p7zip-full and unrar
+# Example Debian: $sudo apt install inotify-tools gzip bzip2 xz-utils unzip p7zip-full unrar
 # --
-# Requirements: Install inotify-tools and ffmpeg
-# Example Debian: $sudo apt install inotify-tools ffmpeg
-# --
-# Cron: @reboot dynamic-folders-video-optimizer.sh >/dev/null 2>&1 &
+# Cron: @reboot bash-folders-descompress.sh >/dev/null 2>&1 &
 # --
 
 # START
@@ -19,7 +19,7 @@ export DBUS_SESSION_BUS_ADDRESS="${DBUS_SESSION_BUS_ADDRESS:-unix:path=/run/user
 # VARIABLES
 PROGNAME=$(basename "$0")
 FOLDER_ORIGIN="$2"
-EXTENSIONS_TO_WATCH=("mkv" "mp4" "avi" "mov")
+EXTENSIONS_TO_WATCH=("gzip" "bzip2" "xz" "zip" "7z" "rar")
 
 # FUNCTIONS
 
@@ -30,9 +30,9 @@ usage() {
 
     cat << EOF
 Usage: $PROGNAME [OPTION]
-Watches when new videos are added to a folder and optimizes them.
+Watches new compress files and decompresses all the files.
 Options:
---folder [path]  Folder path where new video will be monitored and optimized
+--folder [path]  Folder path where will be monitored.
 --help           Display this usage message and exit
 EOF
 
@@ -56,50 +56,39 @@ start() {
 	while read -r filename; do
 	    # Gets the file extension
 	    extension="${filename##*.}"
+	    filepath=$(readlink -f "$FOLDER_ORIGIN/$filename")
 	    # Checks if the extension is in the extension list
 	    for ext in "${EXTENSIONS_TO_WATCH[@]}"; do
 		if [[ "$ext" = "$extension" ]]; then
-		    # Check if the file name starts with "optimized"
-		    if [[ "$filename" != optimized* ]]; then
-			# Notifies that the conversion is to be started
-			send-notification "Optimizing $filename ..."
-			# Convert the file to MP4 format using ffmpeg
-
-			# sudo apt-get install gzip bzip2 xz-utils unzip p7zip-full  unrar
-
-filename="$1"
-filetype=$(file -b "$filename" | awk '{print $1}')
-
-case "$filetype" in
-    "gzip")
-        gzip -d "$filename"
-        ;;
-    "bzip2")
-        bzip2 -d "$filename"
-        ;;
-    "XZ")
-        xz -d "$filename"
-        ;;
-    "Zip")
-        unzip "$filename"
-        ;;
-    "7-zip")
-        7z x "$filename"
-        ;;
-    "RAR")
-        unrar x "$filename"
-        ;;
-    *)
-        echo "Tipo de archivo desconocido: $filetype"
-        exit 1
-        ;;
-esac
-
-
-
-			# Notifies that it has been terminated
-			send-notification "Completed! Output: optimized_${filename%.*}.mp4"
-		    fi
+		    # Notifies that the conversion is to be started
+		    send-notification "Descompressing '$filename', please wait."
+		    # Decompresses the file
+		    filetype=$(file -b "$filepath" | awk '{print $1}')
+		    case "$filetype" in
+			"gzip")
+			    gzip -d "$filepath"
+			    ;;
+			"bzip2")
+			    bzip2 -d "$filepath"
+			    ;;
+			"XZ")
+			    xz -d "$filepath"
+			    ;;
+			"Zip")
+			    unzip "$filepath"
+			    ;;
+			"7-zip")
+			    7z x "$filepath"
+			    ;;
+			"RAR")
+			    unrar x "$filepath"
+			    ;;
+			*)
+			    send-notification "Error: Unknown file type $filetype"
+			    ;;
+		    esac
+		    # Notifies that it has been terminated
+		    send-notification "Descompressing $filename finished."
 		fi
 	    done
 	done
