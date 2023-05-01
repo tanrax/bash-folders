@@ -67,9 +67,9 @@ start() {
 			# Displays a flat file of information
 			touch "$FOLDER_ORIGIN/$MESSAGE_WAITING"
 			# Convert the file to MP4 format using ffmpeg in /tmp/
-			ffmpeg -i "/tmp/$filename" -c:v libx264 -tune stillimage -c:a aac -b:a 192k -pix_fmt yuv420p -nostdin -shortest "$FOLDER_ORIGIN/optimized_${filename%.*}.mp4"
+			ffmpeg -i "$FOLDER_ORIGIN/$filename" -c:v libx264 -tune stillimage -c:a aac -b:a 192k -pix_fmt yuv420p -nostdin -shortest "$FOLDER_ORIGIN/.optimized_${filename%.*}.mp4"
 			# When finished move the optimized file
-			mv "/tmp/$filename" "$FOLDER_ORIGIN/$filename"
+			mv "$FOLDER_ORIGIN/.optimized_${filename%.*}.mp4" "$FOLDER_ORIGIN/optimized_${filename%.*}.mp4"
 			# Notifies that it has been terminated
 			send-notification "Completed! Output: optimized_${filename%.*}.mp4"
 			# Remove a flat file of information
