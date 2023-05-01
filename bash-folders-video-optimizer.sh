@@ -62,16 +62,17 @@ start() {
 		if [[ "$ext" = "$extension" ]]; then
 		    # Check if the file name starts with "optimized"
 		    if [[ "$filename" != optimized* ]]; then
+		    	filename_output="optimized_${filename%.*}.mp4"
 			# Notifies that the conversion is to be started
-			send-notification "Optimizing $filename ..."
+			send-notification "Optimizing $filename_output ..."
 			# Displays a flat file of information
 			touch "$FOLDER_ORIGIN/$MESSAGE_WAITING"
 			# Convert the file to MP4 format using ffmpeg in /tmp/
-			ffmpeg -i "$FOLDER_ORIGIN/$filename" -c:v libx264 -tune stillimage -c:a aac -b:a 192k -pix_fmt yuv420p -nostdin -shortest "$FOLDER_ORIGIN/.optimized_${filename%.*}.mp4"
+			ffmpeg -i "$FOLDER_ORIGIN/$filename" -c:v libx264 -tune stillimage -c:a aac -b:a 192k -pix_fmt yuv420p -nostdin -shortest "/tmp/$filename_output"
 			# When finished move the optimized file
-			mv "$FOLDER_ORIGIN/.optimized_${filename%.*}.mp4" "$FOLDER_ORIGIN/optimized_${filename%.*}.mp4"
+			mv "/tmp/$filename_output" "$FOLDER_ORIGIN/$filename_output"
 			# Notifies that it has been terminated
-			send-notification "Completed! Output: optimized_${filename%.*}.mp4"
+			send-notification "Completed! Output: $filename_output"
 			# Remove a flat file of information
 			rm "$FOLDER_ORIGIN/$MESSAGE_WAITING"
 		    fi
