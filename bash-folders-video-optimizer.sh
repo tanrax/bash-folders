@@ -20,6 +20,7 @@ export DBUS_SESSION_BUS_ADDRESS="${DBUS_SESSION_BUS_ADDRESS:-unix:path=/run/user
 PROGNAME=$(basename "$0")
 FOLDER_ORIGIN="$2"
 EXTENSIONS_TO_WATCH=("mkv" "mp4" "avi" "mov")
+MESSAGE_WAITING="optimizing_please_wait"
 
 # FUNCTIONS
 
@@ -63,10 +64,16 @@ start() {
 		    if [[ "$filename" != optimized* ]]; then
 			# Notifies that the conversion is to be started
 			send-notification "Optimizing $filename ..."
-			# Convert the file to MP4 format using ffmpeg
-			ffmpeg -i "$FOLDER_ORIGIN/$filename" -c:v libx264 -tune stillimage -c:a aac -b:a 192k -pix_fmt yuv420p -nostdin -shortest "$FOLDER_ORIGIN/optimized_${filename%.*}.mp4"
+			# Displays a flat file of information
+			touch "$FOLDER_ORIGIN/$MESSAGE_WAITING"
+			# Convert the file to MP4 format using ffmpeg in /tmp/
+			ffmpeg -i "/tmp/$filename" -c:v libx264 -tune stillimage -c:a aac -b:a 192k -pix_fmt yuv420p -nostdin -shortest "$FOLDER_ORIGIN/optimized_${filename%.*}.mp4"
+			# When finished move the optimized file
+			mv "/tmp/$filename" "$FOLDER_ORIGIN/$filename"
 			# Notifies that it has been terminated
 			send-notification "Completed! Output: optimized_${filename%.*}.mp4"
+			# Remove a flat file of information
+			rm "$FOLDER_ORIGIN/$MESSAGE_WAITING"
 		    fi
 		fi
 	    done
