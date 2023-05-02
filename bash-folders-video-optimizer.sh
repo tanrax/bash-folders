@@ -4,17 +4,13 @@
 # Description: Script that watches when new videos are added to a folder and optimizes them.
 # --
 # Requirements: Install inotify-tools and ffmpeg
-# Example Debian: $sudo apt install inotify-tools ffmpeg
+# Example Debian: $sudo apt install ffmpeg
 # --
 # Cron: @reboot bash-folders-video-optimizer.sh >/dev/null 2>&1 &
 # --
 
 # START
 set -e
-
-# EXPORTS
-# Fix: notify-send command doesn't launch the notification through systemd service
-export DBUS_SESSION_BUS_ADDRESS="${DBUS_SESSION_BUS_ADDRESS:-unix:path=/run/user/${UID}/bus}"
 
 # VARIABLES
 PROGNAME=$(basename "$0")
@@ -40,17 +36,6 @@ EOF
     exit 1
 }
 
-send-notification() {
-    if command -v notify-send >/dev/null 2>&1; then
-	# Send a native notification
-	notify-send "$1"
-    else
-	# If the above command is not available, print by console
-	echo "$1"
-    fi
-
-}
-
 start() {
     # Monitors the selected folder
     inotifywait -m -e create,moved_to --format '%f' "$FOLDER_ORIGIN" |
@@ -63,16 +48,12 @@ start() {
 		    # Check if the file name starts with "optimized"
 		    if [[ "$filename" != optimized* ]]; then
 		    	filename_output="optimized_${filename%.*}.mp4"
-			# Notifies that the conversion is to be started
-			send-notification "Optimizing $filename_output ..."
 			# Displays a flat file of information
 			touch "$FOLDER_ORIGIN/$MESSAGE_WAITING"
 			# Convert the file to MP4 format using ffmpeg in /tmp/
 			ffmpeg -i "$FOLDER_ORIGIN/$filename" -c:v libx264 -tune stillimage -c:a aac -b:a 192k -pix_fmt yuv420p -nostdin -shortest "/tmp/$filename_output"
 			# When finished move the optimized file
 			mv "/tmp/$filename_output" "$FOLDER_ORIGIN/$filename_output"
-			# Notifies that it has been terminated
-			send-notification "Completed! Output: $filename_output"
 			# Remove a flat file of information
 			rm "$FOLDER_ORIGIN/$MESSAGE_WAITING"
 		    fi

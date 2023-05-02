@@ -16,13 +16,12 @@ Folder that watches when new videos are added and optimizes them.
 
 ### Requirements
 
-- `inotify-tools`
 - `ffmpeg`
 
 Example in Debian.
 
 ``` sh
-sudo apt install inotify-tools ffmpeg
+sudo apt install ffmpeg
 ```
 
 ### Install
