@@ -1,5 +1,7 @@
 # Bash folders
 
+![Bash folder brand](assets/brand.webp)
+
 Collection of Bash scripts to execute functionalities in folders, such as optimizing videos, unzipping files, converting images, etc.
 
 - [Video optimizer](#video-optimizer)
