@@ -1,6 +1,6 @@
 # Bash folders
 
-![Bash folder brand](assets/brand.webp)
+![Bash folder brand](assets/brand-small.webp)
 
 Collection of Bash scripts to execute functionalities in folders, such as optimizing videos, unzipping files, converting images, etc.
 
