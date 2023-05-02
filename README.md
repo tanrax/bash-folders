@@ -2,7 +2,7 @@
 
 ![Bash folder brand](assets/social.webp)
 
-Collection of Bash scripts to execute functionalities in folders, such as optimizing videos, unzipping files, converting images, etc.
+Collection of Bash scripts to execute functionalities in folders, such as:
 
 - [Video optimizer](#video-optimizer)
 - [Battery hook](#battery-hook)
