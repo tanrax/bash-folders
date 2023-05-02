@@ -107,9 +107,9 @@ Add to document.
 
 ## Battery hook
 
-Folder with scripts to be launched in different battery states.
+Folder with custom scripts to be launched in different battery states.
 
-The filename of the scripts must be:
+The filename of the scripts, or your custom scripts,  must be:
 
 - `discharging`: When the battery is in use.
 - `charging`: When the battery is charging.
@@ -166,7 +166,7 @@ Create a file in `/etc/systemd/system/bash-folders-battery-hook.service` with th
 
 ```ini
 [Unit]
-Description=Folder with scripts to be launched in different battery states.
+Description=Folder with custom scripts to be launched in different battery states.
 
 [Service]
 Restart=always
@@ -186,7 +186,7 @@ Create a file in `/etc/systemd/system/bash-folders-battery-hook.timer` with the 
 
 ```ini
 [Unit]
-Description=Folder with scripts to be launched in different battery states every minute.
+Description=Folder with custom scripts to be launched in different battery states every minute.
 
 [Timer]
 OnCalendar=*-*-* *:*:00
