@@ -220,7 +220,7 @@ crontab -e
 Add to document.
 
 ``` sh
-@reboot * * * * * bash-folders-battery-hook --folder [folder path]
+* * * * * bash-folders-battery-hook --folder [folder path]
 ```
 
 ---
