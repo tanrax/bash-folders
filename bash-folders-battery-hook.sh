@@ -6,17 +6,6 @@
 # Cron: * * * * *  bash-folders-battery-hook.sh --folder [folder path]
 # --
 
-#cat /sys/class/power_supply/BAT0/capacity
-
-#cat /sys/class/power_supply/BAT0/status
-
-#Discharging
-#Charging
-#Full
-
-#xrandr --output eDP --brightness 1
-
-
 # START
 set -e
 
@@ -25,6 +14,16 @@ PROGNAME=$(basename "$0")
 FOLDER_ORIGIN="$2"
 LOW_BATTERY=15
 HIGH_BATTERY=85
+DISCHARGING_SCRIPT="discharging"
+PATH_DISCHARGING_SCRIPT="$FOLDER_ORIGIN/$DISCHARGING_SCRIPT"
+CHARGING_SCRIPT="charging"
+PATH_CHARGING_SCRIPT="$FOLDER_ORIGIN/$CHARGING_SCRIPT"
+LOW_SCRIPT="low"
+PATH_LOW_SCRIPT="$FOLDER_ORIGIN/$LOW_SCRIPT"
+HIGH_SCRIPT="high"
+PATH_HIGH_SCRIPT="$FOLDER_ORIGIN/$HIGH_SCRIPT"
+FULL_SCRIPT="full"
+PATH_FULL_SCRIPT="$FOLDER_ORIGIN/$FULL_SCRIPT"
 
 # FUNCTIONS
 
@@ -38,57 +37,102 @@ Usage: $PROGNAME [OPTION]
 Script that launches other scripts in different battery states.
   "discharging" When the battery is in use.
   "charging" When the battery is charging.
-  "low" When it reaches the low percentage. Default 15.
-  "high" When it reaches the high percentage. Default 85.
+  "low" When it reaches the low percentage.
+  "high" When it reaches the high percentage.
   "full" When the battery is full.
 
 Options:
 --folder [path]  Folder where the different scripts are located.
+--low [number]   Low battery percentage. Default 15.
+--high [number]  High battery percentage. Default 85.
 --help           Display this usage message and exit
 EOF
 
     exit 1
 }
 
-send-notification() {
-    if command -v notify-send >/dev/null 2>&1; then
-	# Send a native notification
-	notify-send "$1"
-    else
-	# If the above command is not available, print by console
-	echo "$1"
-    fi
+status() {
+    # Possible values: Discharging, Charging and Full
+    cat /sys/class/power_supply/BAT0/status
+}
 
+capacity() {
+    # Possible values: 0-100
+    cat /sys/class/power_supply/BAT0/capacity
+}
+
+run_discharging() {
+    # Check if discharging script exists
+    if [ ! -f $PATH_DISCHARGING_SCRIPT ]; then
+	# If not, create it
+	touch $PATH_DISCHARGING_SCRIPT
+	chmod +x $PATH_DISCHARGING_SCRIPT
+    fi
+    # If status is discharging, run discharging script
+    if [ $(status) = "Discharging" ]; then
+	$PATH_DISCHARGING_SCRIPT
+    fi
+}
+
+run_charging() {
+    # Check if charging script exists
+    if [ ! -f $PATH_CHARGING_SCRIPT ]; then
+	# If not, create it
+	touch $PATH_CHARGING_SCRIPT
+	chmod +x $PATH_CHARGING_SCRIPT
+    fi
+    # If status is charging, run charging script
+    if [ $(status) = "Charging" ]; then
+	$PATH_CHARGING_SCRIPT
+    fi
+}
+
+run_low() {
+    # Check if low script exists
+    if [ ! -f $PATH_LOW_SCRIPT ]; then
+	# If not, create it
+	touch $PATH_LOW_SCRIPT
+	chmod +x $PATH_LOW_SCRIPT
+    fi
+    # If status is discharging and battery is low, run low script
+    if [ $(status) = "Discharging" ] && [ $(capacity) -le $LOW_BATTERY ]; then
+	$PATH_LOW_SCRIPT
+    fi
+}
+
+run_high() {
+    # Check if high script exists
+    if [ ! -f $PATH_HIGH_SCRIPT ]; then
+	# If not, create it
+	touch $PATH_HIGH_SCRIPT
+	chmod +x $PATH_HIGH_SCRIPT
+    fi
+    # If status is charging and battery is high, run high script
+    if [ $(status) = "Charging" ] && [ $(capacity) -ge $HIGH_BATTERY ]; then
+	$PATH_HIGH_SCRIPT
+    fi
+}
+
+run_full() {
+    # Check if full script exists
+    if [ ! -f $PATH_FULL_SCRIPT ]; then
+	# If not, create it
+	touch $PATH_FULL_SCRIPT
+	chmod +x $PATH_FULL_SCRIPT
+    fi
+    # If status is charging and battery is full, run full script
+    if [ $(status) = "Full" ]; then
+	$PATH_FULL_SCRIPT
+    fi
 }
 
 start() {
-    # Monitors the selected folder
-    inotifywait -m -e create,moved_to --format '%f' "$FOLDER_ORIGIN" |
-	while read -r filename; do
-	    # Gets the file extension
-	    extension="${filename##*.}"
-	    # Checks if the extension is in the extension list
-	    for ext in "${EXTENSIONS_TO_WATCH[@]}"; do
-		if [[ "$ext" = "$extension" ]]; then
-		    # Check if the file name starts with "optimized"
-		    if [[ "$filename" != optimized* ]]; then
-		    	filename_output="optimized_${filename%.*}.mp4"
-			# Notifies that the conversion is to be started
-			send-notification "Optimizing $filename_output ..."
-			# Displays a flat file of information
-			touch "$FOLDER_ORIGIN/$MESSAGE_WAITING"
-			# Convert the file to MP4 format using ffmpeg in /tmp/
-			ffmpeg -i "$FOLDER_ORIGIN/$filename" -c:v libx264 -tune stillimage -c:a aac -b:a 192k -pix_fmt yuv420p -nostdin -shortest "/tmp/$filename_output"
-			# When finished move the optimized file
-			mv "/tmp/$filename_output" "$FOLDER_ORIGIN/$filename_output"
-			# Notifies that it has been terminated
-			send-notification "Completed! Output: $filename_output"
-			# Remove a flat file of information
-			rm "$FOLDER_ORIGIN/$MESSAGE_WAITING"
-		    fi
-		fi
-	    done
-	done
+    # Run all scripts
+    run_discharging
+    run_charging
+    run_low
+    run_high
+    run_full
 }
 
 # CONTROLE ARGUMENTS
@@ -104,9 +148,15 @@ while [ $# -gt 0 ] ; do
 	if [ $# -eq 2 ]; then
 	    start
 	else
-	    usage "You need to specify the path of the folder to watch."
+	    usage "You need to specify the path of different scripts are located."
 	fi
         ;;
+    --low)
+	LOW_BATTERY=$2
+	;;
+    --high)
+	HIGH_BATTERY=$2
+	;;
     *)
     esac
     shift
