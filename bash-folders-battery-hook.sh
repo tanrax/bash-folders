@@ -152,10 +152,14 @@ while [ $# -gt 0 ] ; do
 	fi
         ;;
     --low)
-	LOW_BATTERY=$2
+	if [ $# -eq 2 ]; then
+	    LOW_BATTERY=$2
+	fi
 	;;
     --high)
-	HIGH_BATTERY=$2
+	if [ $# -eq 2 ]; then
+	    HIGH_BATTERY=$2
+	fi
 	;;
     *)
     esac
