@@ -142,19 +142,10 @@ Example.
 ``` sh
 mkdir battery-scripts
 
-touch battery-scripts/discharging
-chmod +x battery-scripts/discharging
-touch battery-scripts/charging
-chmod +x battery-scripts/charging
-touch battery-scripts/low
-chmod +x battery-scripts/low
-touch battery-scripts/high
-chmod +x battery-scripts/high
-touch battery-scripts/full
-chmod +x battery-scripts/full
-
 bash-folders-battery-hook --folder battery-scripts
 ```
+
+Inside the folder all the empty scripts will be created, which you will have to edit to include the instructions in Bash.
 
 ### Start at operating system startup
 
