@@ -28,7 +28,7 @@ sudo apt install ffmpeg
 
 
 ``` sh
-curl -o bash-folders-video-optimizer https://raw.githubusercontent.com/tanrax/bash-folders/main/bash-folders-video-optimizer.sh && chmod +x bash-folders-video-optimizer && sudo mv bash-folders-video-optimizer /usr/local/bin && echo "🎉 Successfully installed! 🎉"
+curl -o bash-folders-video-optimizer https://raw.githubusercontent.com/tanrax/bash-folders/main/bash-folders-video-optimizer.sh && chmod +x bash-folders-video-optimizer && sudo rm -f /usr/local/bin/bash-folders-video-optimizer && sudo mv bash-folders-video-optimizer /usr/local/bin && echo "🎉 Successfully installed! 🎉"
 ```
 
 Test
@@ -122,7 +122,7 @@ They must have **execution permissions**. If any of them do not exist, they will
 
 
 ``` sh
-curl -o bash-folders-battery-hook https://raw.githubusercontent.com/tanrax/bash-folders/main/bash-folders-battery-hook.sh && chmod +x bash-folders-battery-hook && sudo mv bash-folders-battery-hook /usr/local/bin && echo "🎉 Successfully installed! 🎉"
+curl -o bash-folders-battery-hook https://raw.githubusercontent.com/tanrax/bash-folders/main/bash-folders-battery-hook.sh && chmod +x bash-folders-battery-hook && sudo rm -f /usr/local/bin/bash-folders-battery-hook && sudo mv bash-folders-battery-hook /usr/local/bin && echo "🎉 Successfully installed! 🎉"
 ```
 
 Test

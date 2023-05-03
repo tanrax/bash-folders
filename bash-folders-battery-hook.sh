@@ -9,21 +9,6 @@
 # START
 set -e
 
-# VARIABLES
-PROGNAME=$(basename "$0")
-FOLDER_ORIGIN="$2"
-LOW_BATTERY=15
-HIGH_BATTERY=85
-DISCHARGING_SCRIPT="discharging"
-PATH_DISCHARGING_SCRIPT="$FOLDER_ORIGIN/$DISCHARGING_SCRIPT"
-CHARGING_SCRIPT="charging"
-PATH_CHARGING_SCRIPT="$FOLDER_ORIGIN/$CHARGING_SCRIPT"
-LOW_SCRIPT="low"
-PATH_LOW_SCRIPT="$FOLDER_ORIGIN/$LOW_SCRIPT"
-HIGH_SCRIPT="high"
-PATH_HIGH_SCRIPT="$FOLDER_ORIGIN/$HIGH_SCRIPT"
-FULL_SCRIPT="full"
-PATH_FULL_SCRIPT="$FOLDER_ORIGIN/$FULL_SCRIPT"
 
 # FUNCTIONS
 
@@ -63,65 +48,65 @@ capacity() {
 
 run_discharging() {
     # Check if discharging script exists
-    if [ ! -f $PATH_DISCHARGING_SCRIPT ]; then
+    if [ ! -f "$PATH_DISCHARGING_SCRIPT" ]; then
 	# If not, create it
-	touch $PATH_DISCHARGING_SCRIPT
-	chmod +x $PATH_DISCHARGING_SCRIPT
+	touch "$PATH_DISCHARGING_SCRIPT"
+	chmod +x "$PATH_DISCHARGING_SCRIPT"
     fi
     # If status is discharging, run discharging script
-    if [ $(status) = "Discharging" ]; then
+    if [ "$(status)" = "Discharging" ]; then
 	$PATH_DISCHARGING_SCRIPT
     fi
 }
 
 run_charging() {
     # Check if charging script exists
-    if [ ! -f $PATH_CHARGING_SCRIPT ]; then
+    if [ ! -f "$PATH_CHARGING_SCRIPT" ]; then
 	# If not, create it
-	touch $PATH_CHARGING_SCRIPT
-	chmod +x $PATH_CHARGING_SCRIPT
+	touch "$PATH_CHARGING_SCRIPT"
+	chmod +x "$PATH_CHARGING_SCRIPT"
     fi
     # If status is charging, run charging script
-    if [ $(status) = "Charging" ]; then
+    if [ "$(status)" = "Charging" ]; then
 	$PATH_CHARGING_SCRIPT
     fi
 }
 
 run_low() {
     # Check if low script exists
-    if [ ! -f $PATH_LOW_SCRIPT ]; then
+    if [ ! -f "$PATH_LOW_SCRIPT" ]; then
 	# If not, create it
-	touch $PATH_LOW_SCRIPT
-	chmod +x $PATH_LOW_SCRIPT
+	touch "$PATH_LOW_SCRIPT"
+	chmod +x "$PATH_LOW_SCRIPT"
     fi
     # If status is discharging and battery is low, run low script
-    if [ $(status) = "Discharging" ] && [ $(capacity) -le $LOW_BATTERY ]; then
+    if [ "$(status)" = "Discharging" ] && [ "$(capacity)" -le "$LOW_BATTERY" ]; then
 	$PATH_LOW_SCRIPT
     fi
 }
 
 run_high() {
     # Check if high script exists
-    if [ ! -f $PATH_HIGH_SCRIPT ]; then
+    if [ ! -f "$PATH_HIGH_SCRIPT" ]; then
 	# If not, create it
-	touch $PATH_HIGH_SCRIPT
-	chmod +x $PATH_HIGH_SCRIPT
+	touch "$PATH_HIGH_SCRIPT"
+	chmod +x "$PATH_HIGH_SCRIPT"
     fi
     # If status is charging and battery is high, run high script
-    if [ $(status) = "Charging" ] && [ $(capacity) -ge $HIGH_BATTERY ]; then
+    if [ "$(status)" = "Charging" ] && [ "$(capacity)" -ge "$HIGH_BATTERY" ]; then
 	$PATH_HIGH_SCRIPT
     fi
 }
 
 run_full() {
     # Check if full script exists
-    if [ ! -f $PATH_FULL_SCRIPT ]; then
+    if [ ! -f "$PATH_FULL_SCRIPT" ]; then
 	# If not, create it
-	touch $PATH_FULL_SCRIPT
-	chmod +x $PATH_FULL_SCRIPT
+	touch "$PATH_FULL_SCRIPT"
+	chmod +x "$PATH_FULL_SCRIPT"
     fi
     # If status is charging and battery is full, run full script
-    if [ $(status) = "Full" ]; then
+    if [ "$(status)" = "Full" ]; then
 	$PATH_FULL_SCRIPT
     fi
 }
@@ -136,36 +121,53 @@ start() {
 }
 
 # CONTROLE ARGUMENTS
-isArg=""
 
-while [ $# -gt 0 ] ; do
-    case "$1" in
-    --help)
-        usage
-        ;;
-    --folder)
-        isArg="1"
-	if [ $# -eq 2 ]; then
-	    start
-	else
-	    usage "You need to specify the path of different scripts are located."
-	fi
-        ;;
-    --low)
-	if [ $# -eq 2 ]; then
-	    LOW_BATTERY=$2
-	fi
-	;;
-    --high)
-	if [ $# -eq 2 ]; then
-	    HIGH_BATTERY=$2
-	fi
-	;;
-    *)
+# Parse command line arguments
+while [[ $# -gt 0 ]]
+do
+    key="$1"
+    case $key in
+	--folder)
+	    FOLDER_ORIGIN="$2"
+	    shift # past argument
+	    shift # past value
+	    ;;
+	--low)
+	    LOW_BATTERY="$2"
+	    shift # past argument
+	    shift # past value
+	    ;;
+	--high)
+	    HIGH_BATTERY="$2"
+	    shift # past argument
+	    shift # past value
+	    ;;
+	*)
+	    usage "Unknown option: $1"
+	    ;;
     esac
-    shift
 done
 
-if [ -z $isArg ] ; then
-    usage "Not enough arguments"
+
+# VARIABLES
+PROGNAME=$(basename "$0")
+LOW_BATTERY=15
+HIGH_BATTERY=85
+DISCHARGING_SCRIPT="discharging"
+PATH_DISCHARGING_SCRIPT="$FOLDER_ORIGIN/$DISCHARGING_SCRIPT"
+CHARGING_SCRIPT="charging"
+PATH_CHARGING_SCRIPT="$FOLDER_ORIGIN/$CHARGING_SCRIPT"
+LOW_SCRIPT="low"
+PATH_LOW_SCRIPT="$FOLDER_ORIGIN/$LOW_SCRIPT"
+HIGH_SCRIPT="high"
+PATH_HIGH_SCRIPT="$FOLDER_ORIGIN/$HIGH_SCRIPT"
+FULL_SCRIPT="full"
+PATH_FULL_SCRIPT="$FOLDER_ORIGIN/$FULL_SCRIPT"
+
+# Check if the required --folder flag is provided
+if [ -z "$FOLDER_ORIGIN" ]; then
+    echo "Error: The --folder flag is required."
+    exit 1
+else
+    start
 fi
