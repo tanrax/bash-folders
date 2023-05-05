@@ -6,7 +6,7 @@ Collection of Bash scripts to execute functionalities in folders, such as:
 
 - [Video optimizer](#video-optimizer)
 - [Battery hook](#battery-hook)
-- [Decompress files](#decompress-files)
+- [Image to webp](#image-to-webp)
 
 ---
 
@@ -211,6 +211,100 @@ Add to document.
 
 ``` sh
 * * * * * bash-folders-battery-hook --folder [folder path]
+```
+
+---
+
+## Image to WebP
+
+Folder that watches when new image (PNG or JPEG) are added and transform to WebP format.
+
+### Requirements
+
+- `webp`
+
+Example in Debian.
+
+``` sh
+sudo apt install webp
+```
+
+### Install
+
+
+``` sh
+curl -o bash-folders-image-to-webp https://raw.githubusercontent.com/tanrax/bash-folders/main/bash-folders-image-to-webp.sh && chmod +x bash-folders-image-to-webp && sudo rm -f /usr/local/bin/bash-folders-image-to-webp && sudo mv bash-folders-image-to-webp /usr/local/bin && echo "🎉 Successfully installed! 🎉"
+```
+
+Test
+
+``` sh
+bash-folders-image-to-webp --help
+```
+
+### Run
+
+``` sh
+bash-folders-image-to-webp --folder [folder to watch]
+```
+
+Example.
+
+``` sh
+mkdir image-to-webp-converter
+bash-folders-image-to-webp --folder image-to-webp-converter
+```
+
+And leave a image that you want to optimize in the folder `image-to-webp-converter`.
+
+### Start at operating system startup
+
+#### Option 1: Service
+
+Create a file in `/etc/systemd/system/bash-folders-image-to-webp.service` with the following content.
+
+
+```ini
+[Unit]
+Description=Folder that watches when new image (PNG or JPEG) are added and transform to WebP format.
+
+[Service]
+Restart=always
+RestartSec=5
+User=[user]
+ExecStart=bash-folders-image-to-webp --folder [folder to watch]
+
+[Install]
+WantedBy=multi-user.target
+```
+
+Edit it to your needs.
+
+Recharge services.
+
+``` sh
+sudo systemctl daemon-reload
+```
+
+And activate it.
+
+``` sh
+sudo systemctl enable bash-folders-image-to-webp
+sudo systemctl start bash-folders-image-to-webp
+```
+
+#### Option 2: Cron
+
+Open.
+
+``` sh
+crontab -e
+```
+
+Add to document.
+
+``` sh
+@reboot bash-folders-image-to-webp --folder [folder to watch] >/dev/null 2>&1 &
 ```
 
 ---
