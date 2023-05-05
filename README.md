@@ -66,7 +66,7 @@ Description=Folder that watches when new videos are added and optimizes them.
 [Service]
 Restart=always
 RestartSec=5
-User=[user]Collaborations & Pull Requests
+User=[user]
 ExecStart=bash-folders-video-optimizer --folder [folder to watch]
 
 [Install]
