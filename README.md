@@ -4,9 +4,9 @@
 
 Collection of Bash scripts to execute functionalities in folders, such as:
 
-- [Video optimizer](#video-optimizer)
-- [Battery hook](#battery-hook)
-- [Image to webp](#image-to-webp)
+- [Video optimizer](#video-optimizer): Folder that watches when new videos are added and optimizes them.
+- [Battery hook](#battery-hook): Folder with custom scripts to be launched in different battery states.
+- [Image to webp](#image-to-webp): Folder that watches when new image (PNG or JPEG) are added and transform to WebP format.
 
 ---
 
