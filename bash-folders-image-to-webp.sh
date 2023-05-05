@@ -1,4 +1,3 @@
-
 #!/usr/bin/env bash
 
 # --
@@ -33,23 +32,21 @@ EOF
 }
 
 start() {
-    # Output
-    cd "$FOLDER_ORIGIN"
     # Monitors the selected folder
     inotifywait -m -e create,moved_to --format '%f' "$FOLDER_ORIGIN" |
 	while read -r filename; do
 	    # Gets the file extension
 	    extension="${filename##*.}"
-	    filepath=$(readlink -f "$FOLDER_ORIGIN/$filename")
 	    # Checks if the extension is in the extension list
 	    for ext in "${EXTENSIONS_TO_WATCH[@]}"; do
 		if [[ "$ext" = "$extension" ]]; then
-			filename_output="optimized_${filename%.*}.mp4"
-		    # Decompresses the file
-		    filetype=$(file -b "$filepath" | awk '{print $1}')
-		    cwebp -q 90 example.jpeg -o example.webp
-		    # Notifies that it has been terminated
-		    send-notification "Descompressing $filename finished."
+		    filename_output="${filename%.*}.webp"
+		    # Displays a flat file of information
+		    touch "$FOLDER_ORIGIN/$MESSAGE_WAITING"
+		    # Converts the image to WebP
+		    cwebp -q "$QUALITY" "$FOLDER_ORIGIN/$filename" -o "$FOLDER_ORIGIN/$filename_output"
+		    # Remove a flat file of information
+		    rm "$FOLDER_ORIGIN/$MESSAGE_WAITING"
 		fi
 	    done
 	done
@@ -81,19 +78,22 @@ done
 
 # VARIABLES
 PROGNAME=$(basename "$0")
-FOLDER_ORIGIN="$2"
+QUALITY="90"
+MESSAGE_WAITING="converting_please_wait"
 EXTENSIONS_TO_WATCH=("jpg" "jpeg" "png")
 
 # CHECKS
 
 # Check if exists cwebp
-if ! which -q cwebp; then
+if ! which cwebp > /dev/null; then
     echo "Error: You must install the WebP terminal tools."
     exit 1
+fi
 
 # Check if the required --folder flag is provided
 if [ -z "$FOLDER_ORIGIN" ]; then
     echo "Error: The --folder flag is required."
     exit 1
-    
+fi
+
 start
