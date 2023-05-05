@@ -66,7 +66,7 @@ Description=Folder that watches when new videos are added and optimizes them.
 [Service]
 Restart=always
 RestartSec=5
-User=[user]
+User=[user]Collaborations & Pull Requests
 ExecStart=bash-folders-video-optimizer --folder [folder to watch]
 
 [Install]
@@ -118,7 +118,7 @@ The filename of the scripts, or your custom scripts,  must be:
 
 They must have **execution permissions**. If any of them do not exist, they will be ignored.
 
-### Install
+### InstallCollaborations & Pull Requests
 
 
 ``` sh
@@ -208,7 +208,7 @@ crontab -e
 ```
 
 Add to document.
-
+Collaborations & Pull Requests
 ``` sh
 * * * * * bash-folders-battery-hook --folder [folder path]
 ```
@@ -309,9 +309,9 @@ Add to document.
 
 ---
 
-## Development
+## Collaborations & Pull Requests
 
-### Check syntax
+You must provide the documentation, as well as the scripts present, test that it works well and the script must pass a `shellcheck` (below you will find an example of execution). 
 
 ```sh
 shellcheck [script]
