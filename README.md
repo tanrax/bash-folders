@@ -2,7 +2,7 @@
 
 ![Bash folder brand](assets/social.webp)
 
-Collection of Bash scripts to execute functionalities in folders, such as:
+Small collection of Bash scripts to launch functionalities in folders when new files appear, such as optimizing videos, converting images or battery management.
 
 - [Video optimizer](#video-optimizer): Folder that watches when new videos are added and optimizes them.
 - [Battery hook](#battery-hook): Folder with custom scripts to be launched in different battery states.
