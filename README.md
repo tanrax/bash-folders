@@ -112,8 +112,8 @@ The filename of the scripts, or your custom scripts,  must be:
 
 - `discharging`: When the battery is in use.
 - `charging`: When the battery is charging.
-- `low`: When it reaches the low percentage. Default 15.
-- `high`: When it reaches the high percentage. Default 85.
+- `low`: When it reaches the low percentage. Default 20.
+- `high`: When it reaches the high percentage. Default 80.
 - `full`: When the battery is full.
 
 They must have **execution permissions**. If any of them do not exist, they will be ignored.
