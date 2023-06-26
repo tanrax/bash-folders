@@ -118,7 +118,7 @@ The filename of the scripts, or your custom scripts,  must be:
 
 They must have **execution permissions**. If any of them do not exist, they will be ignored.
 
-### InstallCollaborations & Pull Requests
+### Install
 
 
 ``` sh
