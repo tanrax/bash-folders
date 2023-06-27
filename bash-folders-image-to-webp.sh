@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 
-set -e
-
 usage() {
     cat << EOF
 USAGE: ${0##*/} [OPTIONS] PATH
@@ -15,8 +13,6 @@ OPTIONS:
 SEE ALSO:
     cwebp(1), inotifywait(1)
 EOF
-
-    exit 1
 }
 
 require() {
@@ -27,6 +23,8 @@ require() {
 
 run() {
     local file extension
+
+    set -e
 
     mkdir --parents "${1}"
 
