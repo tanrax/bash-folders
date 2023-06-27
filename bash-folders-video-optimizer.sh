@@ -1,88 +1,64 @@
 #!/usr/bin/env bash
 
-# --
-# Description: Script that watches when new videos are added to a folder and optimizes them.
-# --
-# Requirements: Install inotify-tools and ffmpeg
-# Example Debian: $sudo apt install ffmpeg
-# --
-# Cron: @reboot bash-folders-video-optimizer.sh >/dev/null 2>&1 &
-# --
-
-# START
 set -e
 
-# VARIABLES
-PROGNAME=$(basename "$0")
 FOLDER_ORIGIN="$2"
 EXTENSIONS_TO_WATCH=("mkv" "mp4" "avi" "mov")
 MESSAGE_WAITING="optimizing_please_wait"
 
-# FUNCTIONS
-
 usage() {
-    if [ "$*" != "" ] ; then
-        echo "Error: $*"
-    fi
+    [[ -n "${*}" ]] && printf '%s\n' "Error: ${*}" >&2
 
     cat << EOF
-Usage: $PROGNAME [OPTION]
+USAGE: ${0##*/} [OPTION] --folder PATH
+
 Watches when new videos are added to a folder and optimizes them.
-Options:
---folder [path]  Folder path where new video will be monitored and optimized
---help           Display this usage message and exit
+
+OPTIONS:
+    --help          Display this usage message and exit
+    --folder PATH   Folder path where new video will be monitored and optimized
 EOF
 
     exit 1
 }
 
 start() {
-    # Monitors the selected folder
-    inotifywait -m -e create,moved_to --format '%f' "$FOLDER_ORIGIN" |
-	while read -r filename; do
-	    # Gets the file extension
-	    extension="${filename##*.}"
-	    # Checks if the extension is in the extension list
-	    for ext in "${EXTENSIONS_TO_WATCH[@]}"; do
-		if [[ "$ext" = "$extension" ]]; then
-		    # Check if the file name starts with "optimized"
-		    if [[ "$filename" != optimized* ]]; then
-		    	filename_output="optimized_${filename%.*}.mp4"
-			# Displays a flat file of information
-			touch "$FOLDER_ORIGIN/$MESSAGE_WAITING"
-			# Convert the file to MP4 format using ffmpeg in /tmp/
-			ffmpeg -i "$FOLDER_ORIGIN/$filename" -c:v libx264 -tune stillimage -c:a aac -b:a 192k -pix_fmt yuv420p -nostdin -shortest "/tmp/$filename_output"
-			# When finished move the optimized file
-			mv "/tmp/$filename_output" "$FOLDER_ORIGIN/$filename_output"
-			# Remove a flat file of information
-			rm "$FOLDER_ORIGIN/$MESSAGE_WAITING"
-		    fi
-		fi
-	    done
-	done
+    inotifywait -m -e create,moved_to --format '%f' "$FOLDER_ORIGIN" | while read -r filename; do
+        extension="${filename##*.}"
+        for ext in "${EXTENSIONS_TO_WATCH[@]}"; do
+            if [[ "$ext" = "$extension" ]]; then
+                if [[ "$filename" != optimized* ]]; then
+                    filename_output="optimized_${filename%.*}.mp4"
+                    touch "$FOLDER_ORIGIN/$MESSAGE_WAITING"
+                    ffmpeg -i "$FOLDER_ORIGIN/$filename" -c:v libx264 -tune stillimage -c:a aac -b:a 192k -pix_fmt yuv420p -nostdin -shortest "/tmp/$filename_output"
+                    mv "/tmp/$filename_output" "$FOLDER_ORIGIN/$filename_output"
+                    rm "$FOLDER_ORIGIN/$MESSAGE_WAITING"
+                fi
+            fi
+        done
+    done
 }
 
-# CONTROLE ARGUMENTS
 isArg=""
 
-while [ $# -gt 0 ] ; do
+while [[ $# -gt 0 ]]; do
     case "$1" in
     --help)
         usage
         ;;
     --folder)
         isArg="1"
-	if [ $# -eq 2 ]; then
-	    start
-	else
-	    usage "You need to specify the path of the folder to watch."
-	fi
+        if [ $# -eq 2 ]; then
+            start
+        else
+            usage "You need to specify the path of the folder to watch."
+        fi
         ;;
     *)
     esac
     shift
 done
 
-if [ -z $isArg ] ; then
+if [[ -z "${isArg}" ]]; then
     usage "Not enough arguments"
 fi
