@@ -2,7 +2,7 @@
 
 usage() {
     cat << EOF
-USAGE: ${0##*/} [OPTION] PATH
+USAGE: ${0##*/} [OPTIONS] PATH
 
 Launches other scripts for different battery states
 
