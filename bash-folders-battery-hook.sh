@@ -92,11 +92,7 @@ main() {
             -l | --low )        settings['low']="${2}"; shift;;
             -H | --high )       settings['high']="${2}"; shift;;
             -- )                shift; break;;
-            * )
-                printf '%s\n' "Unknown option: '${1}'" >&2
-                usage
-                return 1
-                ;;
+            * )                 break;;
         esac
         shift
     done

@@ -56,11 +56,7 @@ main() {
             -h | --help )       usage; return 0;;
             -q | --quality )    quality="${2}"; shift;;
             -- )                shift; break;;
-            * )
-                printf '%s\n' "Unknown option: '${1}'" >&2
-                usage
-                return 1
-                ;;
+            * )                 break;;
         esac
         shift
     done

@@ -60,11 +60,7 @@ main() {
         case "${1}" in
             -h | --help )       usage; return 0;;
             -- )                shift; break;;
-            * )
-                printf '%s\n' "Unknown option: '${1}'" >&2
-                usage
-                return 1
-                ;;
+            * )                 break;;
         esac
         shift
     done
