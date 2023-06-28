@@ -21,25 +21,6 @@ STATES:
 EOF
 }
 
-start() {
-    local cap
-    cap="$(capacity)"
-
-    case "$(status | tr '[:upper:]' '[:lower:]')" in
-        full )
-            run_full
-            ;;
-        discharging )
-            run_discharging
-            (( cap <= settings['low'] )) && run_low
-            ;;
-        charging )
-            run_charging
-            (( cap >= settings['high'] )) && run_high
-            ;;
-    esac
-}
-
 run() {
     set -e
 
