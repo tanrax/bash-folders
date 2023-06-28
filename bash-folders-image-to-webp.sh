@@ -19,15 +19,14 @@ require() {
 }
 
 run() {
-    local file extension
+    local file
 
     set -e
 
     mkdir --parents "${1}"
 
     while read -r file; do
-        extension="${file##*.}"
-        [[ "${extension,,}" =~ ^(png|jpe?g)$ ]] || continue
+        [[ "${file,,}" =~ \.(png|jpe?g)$ ]] || continue
 
         printf '%s\n' "Converting file '${file}'..."
         if ! cwebp -q "${quality}" -o "${1}/${file%.*}.webp" "${1}/${file}"; then

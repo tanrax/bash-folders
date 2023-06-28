@@ -26,20 +26,17 @@ optimize() {
 }
 
 run() {
-    local file extension optimized
-    optimized="${1}/optimized"
+    local file
 
     set -e
 
-    mkdir --parents "${optimized}"
+    mkdir --parents "${1}/optimized"
 
     while read -r file; do
-        extension="${file##*.}"
-        [[ "${extension,,}" =~ (avi|m(kv|p4|ov)) ]] || continue
+        [[ "${file,,}" =~ \.(avi|m(kv|p4|ov))$ ]] || continue
 
         printf '%s\n' "Optimizing file '${file}'..."
-
-        if ! optimize "${file}" "${optimized}/${file%.*}.mp4"; then
+        if ! optimize "${file}" "${1}/optimized/${file%.*}.mp4"; then
             printf '%s\n' "Failed to optimize file: '${file}'" >&2
         fi
     done < <(inotifywait --monitor --event "create" --event "moved_to" --format '%f' "${1}")
