@@ -84,6 +84,10 @@ main() {
     fi
 
     mkdir --parents "${1}"
+    for i in "charging" "discharging" "full" "low" "high"; do
+        touch -a "${1}/${j}"
+        chmod +x "${_}"
+    done
 
     run "${1}"
 }
