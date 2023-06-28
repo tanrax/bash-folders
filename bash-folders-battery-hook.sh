@@ -72,6 +72,7 @@ main() {
             -h | --help )       usage; return 0;;
             -l | --low )        settings['low']="${2}"; shift;;
             -H | --high )       settings['high']="${2}"; shift;;
+            -b | --battery )    settings['battery']="${2}"; shift;;
             -- )                shift; break;;
             * )                 break;;
         esac
