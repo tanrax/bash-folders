@@ -11,6 +11,12 @@ OPTIONS:
 EOF
 }
 
+require() {
+    command -v "${1}" &>/dev/null && return
+    printf '%s\n' "Missing required application: '${1}'" >&2
+    return 1
+}
+
 optimize() {
     touch -a "${2}"
     ffmpeg \
@@ -66,6 +72,9 @@ main() {
         printf '%s\n' "No folder specified" >&2
         return 1
     fi
+
+    require "inotifywait" || return
+    require "ffmpeg" || return
 
     mkdir --parents "${1}"
     run "${1}"
