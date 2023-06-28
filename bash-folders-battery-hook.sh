@@ -10,7 +10,7 @@ OPTIONS:
     -h, --help          Display this usage message and exit
     -l, --low INT       Low battery percentage (default: ${defaults['low']})
     -h, --high INT      High battery percentage (default: ${defaults['high']})
-    -b, --battery INT   Battery to be checked
+    -b, --battery INT   Battery to be checked (default: ${defaults['battery']})
 
 STATE SCRIPTS:
     discharching        When the battery is in use
