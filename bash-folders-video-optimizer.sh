@@ -35,7 +35,7 @@ run() {
 
     while read -r file; do
         extension="${file##*.}"
-        [[ "${extension,,}" =~ foo ]] || continue
+        [[ "${extension,,}" =~ (avi|m(kv|p4|ov)) ]] || continue
 
         printf '%s\n' "Optimizing file '${file}'..."
 
