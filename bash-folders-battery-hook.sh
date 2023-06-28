@@ -24,7 +24,7 @@ EOF
 run() {
     set -e
 
-    local status capacity path
+    local status capacity
     status="$(< "/sys/class/power_supply/BAT${settings['battery']}/status")"
     capacity="$(< "/sys/class/power_supply/BAT${settings['battery']}/capacity")"
 
