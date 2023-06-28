@@ -9,9 +9,6 @@ Watches when new image (PNG or JPEG) are added and transform to WebP format
 OPTIONS:
     -h, --help          Display this usage message and exit
     -q, --quaity INT    Specify the compression factor between 0-100 (default: 90)
-
-SEE ALSO:
-    cwebp(1), inotifywait(1)
 EOF
 }
 
