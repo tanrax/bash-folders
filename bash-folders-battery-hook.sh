@@ -12,7 +12,7 @@ OPTIONS:
     -h, --high INT      High battery percentage (default: ${defaults['high']})
     -b, --battery INT   Battery to be checked
 
-STATES:
+STATE SCRIPTS:
     discharching        When the battery is in use
     charging            When the battery is charging
     low                 When the battery reaches the low percentage
@@ -85,7 +85,7 @@ main() {
 
     mkdir --parents "${1}"
     for i in "charging" "discharging" "full" "low" "high"; do
-        touch -a "${1}/${j}"
+        touch -a "${1}/${i}"
         chmod +x "${_}"
     done
 
