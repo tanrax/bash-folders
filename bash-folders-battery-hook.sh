@@ -1,173 +1,96 @@
 #!/usr/bin/env bash
 
-# --
-# Description: Script that launches other scripts in different battery states.
-# --
-# Cron: * * * * *  bash-folders-battery-hook.sh --folder [folder path]
-# --
-
-# START
-set -e
-
-
-# FUNCTIONS
-
 usage() {
-    if [ "$*" != "" ] ; then
-        echo "Error: $*"
-    fi
-
     cat << EOF
-Usage: $PROGNAME [OPTION]
-Script that launches other scripts in different battery states.
-  "discharging" When the battery is in use.
-  "charging" When the battery is charging.
-  "low" When it reaches the low percentage.
-  "high" When it reaches the high percentage.
-  "full" When the battery is full.
+USAGE: ${0##*/} [OPTIONS] PATH
 
-Options:
---folder [path]  Folder where the different scripts are located.
---low [number]   Low battery percentage. Default 15.
---high [number]  High battery percentage. Default 85.
---help           Display this usage message and exit
+Launches other scripts for different battery states
+
+OPTIONS:
+    -h, --help          Display this usage message and exit
+    -l, --low INT       Low battery percentage (default: ${defaults['low']})
+    -h, --high INT      High battery percentage (default: ${defaults['high']})
+    -b, --battery INT   Battery to be checked (default: ${defaults['battery']})
+
+STATE SCRIPTS:
+    discharching        When the battery is in use
+    charging            When the battery is charging
+    low                 When the battery reaches the low percentage
+    high                When the battery reaches the high percentag
+    full                When the battery is full
 EOF
-
-    exit 1
 }
 
-status() {
-    # Possible values: Discharging, Charging and Full
-    cat /sys/class/power_supply/BAT0/status
-}
+run() {
+    set -e
 
-capacity() {
-    # Possible values: 0-100
-    cat /sys/class/power_supply/BAT0/capacity
-}
+    local status capacity
+    status="$(< "/sys/class/power_supply/BAT${settings['battery']}/status")"
+    capacity="$(< "/sys/class/power_supply/BAT${settings['battery']}/capacity")"
 
-run_discharging() {
-    # Check if discharging script exists
-    if [ ! -f "$PATH_DISCHARGING_SCRIPT" ]; then
-	# If not, create it
-	touch "$PATH_DISCHARGING_SCRIPT"
-	chmod +x "$PATH_DISCHARGING_SCRIPT"
-    fi
-    # If status is discharging, run discharging script
-    if [ "$(status)" = "Discharging" ]; then
-	$PATH_DISCHARGING_SCRIPT
-    fi
-}
-
-run_charging() {
-    # Check if charging script exists
-    if [ ! -f "$PATH_CHARGING_SCRIPT" ]; then
-	# If not, create it
-	touch "$PATH_CHARGING_SCRIPT"
-	chmod +x "$PATH_CHARGING_SCRIPT"
-    fi
-    # If status is charging, run charging script
-    if [ "$(status)" = "Charging" ]; then
-	$PATH_CHARGING_SCRIPT
-    fi
-}
-
-run_low() {
-    # Check if low script exists
-    if [ ! -f "$PATH_LOW_SCRIPT" ]; then
-	# If not, create it
-	touch "$PATH_LOW_SCRIPT"
-	chmod +x "$PATH_LOW_SCRIPT"
-    fi
-    # If status is discharging and battery is low, run low script
-    if [ "$(status)" = "Discharging" ] && [ "$(capacity)" -le "$LOW_BATTERY" ]; then
-	$PATH_LOW_SCRIPT
-    fi
-}
-
-run_high() {
-    # Check if high script exists
-    if [ ! -f "$PATH_HIGH_SCRIPT" ]; then
-	# If not, create it
-	touch "$PATH_HIGH_SCRIPT"
-	chmod +x "$PATH_HIGH_SCRIPT"
-    fi
-    # If status is charging and battery is high, run high script
-    if [ "$(status)" = "Charging" ] && [ "$(capacity)" -ge "$HIGH_BATTERY" ]; then
-	$PATH_HIGH_SCRIPT
-    fi
-}
-
-run_full() {
-    # Check if full script exists
-    if [ ! -f "$PATH_FULL_SCRIPT" ]; then
-	# If not, create it
-	touch "$PATH_FULL_SCRIPT"
-	chmod +x "$PATH_FULL_SCRIPT"
-    fi
-    # If status is charging and battery is full, run full script
-    if [ "$(status)" = "Full" ]; then
-	$PATH_FULL_SCRIPT
-    fi
-}
-
-start() {
-    # Run all scripts
-    run_discharging
-    run_charging
-    run_low
-    run_high
-    run_full
-}
-
-# CONTROLE ARGUMENTS
-
-# Parse command line arguments
-while [[ $# -gt 0 ]]
-do
-    key="$1"
-    case $key in
-	--folder)
-	    FOLDER_ORIGIN="$2"
-	    shift # past argument
-	    shift # past value
-	    ;;
-	--low)
-	    LOW_BATTERY="$2"
-	    shift # past argument
-	    shift # past value
-	    ;;
-	--high)
-	    HIGH_BATTERY="$2"
-	    shift # past argument
-	    shift # past value
-	    ;;
-	*)
-	    usage "Unknown option: $1"
-	    ;;
+    case "${status,,}" in
+        discharging )
+            "${1}/${status,,}"
+            if (( capacity <= settings['low'] )); then
+                "${1}/low"
+            fi
+            ;;
+        charging )
+            "${1}/${status,,}"
+            if (( capacity >= settings['high'] )); then
+                "${1}/high"
+            fi
+            ;;
+        full )
+            "${1}/high"
+            "${1}/${status,,}"
+            ;;
     esac
-done
 
+    return 0
+}
 
-# VARIABLES
-PROGNAME=$(basename "$0")
-LOW_BATTERY=20
-HIGH_BATTERY=80
-DISCHARGING_SCRIPT="discharging"
-PATH_DISCHARGING_SCRIPT="$FOLDER_ORIGIN/$DISCHARGING_SCRIPT"
-CHARGING_SCRIPT="charging"
-PATH_CHARGING_SCRIPT="$FOLDER_ORIGIN/$CHARGING_SCRIPT"
-LOW_SCRIPT="low"
-PATH_LOW_SCRIPT="$FOLDER_ORIGIN/$LOW_SCRIPT"
-HIGH_SCRIPT="high"
-PATH_HIGH_SCRIPT="$FOLDER_ORIGIN/$HIGH_SCRIPT"
-FULL_SCRIPT="full"
-PATH_FULL_SCRIPT="$FOLDER_ORIGIN/$FULL_SCRIPT"
+main() {
+    local -A defaults settings
+    local opts i
 
-# Check if the required --folder flag is provided
-if [ -z "$FOLDER_ORIGIN" ]; then
-    echo "Error: The --folder flag is required."
-    exit 1
-else
-    start
-fi
+    opts="$(getopt \
+        --options hl:H:b: \
+        --longoptions help,low:,high:,battery: \
+        --name "${0##*/}" \
+        -- "${@}" \
+    )"
+
+    defaults['low']="15"
+    defaults['high']="85"
+    defaults['battery']="0"
+    for i in "${!defaults[@]}"; do settings["$i"]="${defaults["$i"]}"; done
+
+    eval set -- "${opts}"
+    while true; do
+        case "${1}" in
+            -h | --help )       usage; return 0;;
+            -l | --low )        settings['low']="${2}"; shift;;
+            -H | --high )       settings['high']="${2}"; shift;;
+            -b | --battery )    settings['battery']="${2}"; shift;;
+            -- )                shift; break;;
+            * )                 break;;
+        esac
+        shift
+    done
+
+    if [[ -z "${1}" ]]; then
+        printf '%s\n' "No folder specified" >&2
+        return 1
+    fi
+
+    mkdir --parents "${1}"
+    for i in "charging" "discharging" "full" "low" "high"; do
+        touch -a "${1}/${i}"
+        chmod +x "${_}"
+    done
+
+    run "${1}"
+}
+
+main "${@}"

@@ -1,88 +1,83 @@
 #!/usr/bin/env bash
 
-# --
-# Description: Script that watches when new videos are added to a folder and optimizes them.
-# --
-# Requirements: Install inotify-tools and ffmpeg
-# Example Debian: $sudo apt install ffmpeg
-# --
-# Cron: @reboot bash-folders-video-optimizer.sh >/dev/null 2>&1 &
-# --
-
-# START
-set -e
-
-# VARIABLES
-PROGNAME=$(basename "$0")
-FOLDER_ORIGIN="$2"
-EXTENSIONS_TO_WATCH=("mkv" "mp4" "avi" "mov")
-MESSAGE_WAITING="optimizing_please_wait"
-
-# FUNCTIONS
-
 usage() {
-    if [ "$*" != "" ] ; then
-        echo "Error: $*"
+    cat << EOF
+USAGE: ${0##*/} [OPTION] PATH
+
+Watches when new videos are added to a folder and optimizes them.
+
+OPTIONS:
+    --help          Display this usage message and exit
+EOF
+}
+
+require() {
+    command -v "${1}" &>/dev/null && return
+    printf '%s\n' "Missing required application: '${1}'" >&2
+    return 1
+}
+
+optimize() {
+    touch -a "${2}"
+    ffmpeg \
+        -i "${1}" \
+        -c:v "libx264" \
+        -tune stillimage \
+        -c:a "aac" \
+        -b:a "192k" \
+        -pix_fmt "yuv420p" \
+        -nostdin \
+        -shortest \
+        "${2}"
+}
+
+run() {
+    local file
+
+    set -e
+
+    mkdir --parents "${1}/optimized"
+
+    while read -r file; do
+        [[ "${file,,}" =~ \.(avi|m(kv|p4|ov))$ ]] || continue
+
+        printf '%s\n' "Optimizing file '${file}'..."
+        if ! optimize "${file}" "${1}/optimized/${file%.*}.mp4"; then
+            printf '%s\n' "Failed to optimize file: '${file}'" >&2
+        fi
+    done < <(inotifywait --monitor --event "create" --event "moved_to" --format '%f' "${1}")
+}
+
+main() {
+    local opts
+
+    opts="$(getopt \
+        --options h \
+        --longoptions help \
+        --name "${0##*/}" \
+        -- "${@}" \
+    )"
+
+    eval set -- "${opts}"
+    while true; do
+        case "${1}" in
+            -h | --help )       usage; return 0;;
+            -- )                shift; break;;
+            * )                 break;;
+        esac
+        shift
+    done
+
+    if [[ -z "${1}" ]]; then
+        printf '%s\n' "No folder specified" >&2
+        return 1
     fi
 
-    cat << EOF
-Usage: $PROGNAME [OPTION]
-Watches when new videos are added to a folder and optimizes them.
-Options:
---folder [path]  Folder path where new video will be monitored and optimized
---help           Display this usage message and exit
-EOF
+    require "inotifywait" || return
+    require "ffmpeg" || return
 
-    exit 1
+    mkdir --parents "${1}"
+    run "${1}"
 }
 
-start() {
-    # Monitors the selected folder
-    inotifywait -m -e create,moved_to --format '%f' "$FOLDER_ORIGIN" |
-	while read -r filename; do
-	    # Gets the file extension
-	    extension="${filename##*.}"
-	    # Checks if the extension is in the extension list
-	    for ext in "${EXTENSIONS_TO_WATCH[@]}"; do
-		if [[ "$ext" = "$extension" ]]; then
-		    # Check if the file name starts with "optimized"
-		    if [[ "$filename" != optimized* ]]; then
-		    	filename_output="optimized_${filename%.*}.mp4"
-			# Displays a flat file of information
-			touch "$FOLDER_ORIGIN/$MESSAGE_WAITING"
-			# Convert the file to MP4 format using ffmpeg in /tmp/
-			ffmpeg -i "$FOLDER_ORIGIN/$filename" -c:v libx264 -tune stillimage -c:a aac -b:a 192k -pix_fmt yuv420p -nostdin -shortest "/tmp/$filename_output"
-			# When finished move the optimized file
-			mv "/tmp/$filename_output" "$FOLDER_ORIGIN/$filename_output"
-			# Remove a flat file of information
-			rm "$FOLDER_ORIGIN/$MESSAGE_WAITING"
-		    fi
-		fi
-	    done
-	done
-}
-
-# CONTROLE ARGUMENTS
-isArg=""
-
-while [ $# -gt 0 ] ; do
-    case "$1" in
-    --help)
-        usage
-        ;;
-    --folder)
-        isArg="1"
-	if [ $# -eq 2 ]; then
-	    start
-	else
-	    usage "You need to specify the path of the folder to watch."
-	fi
-        ;;
-    *)
-    esac
-    shift
-done
-
-if [ -z $isArg ] ; then
-    usage "Not enough arguments"
-fi
+main "${@}"

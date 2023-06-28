@@ -1,99 +1,71 @@
 #!/usr/bin/env bash
 
-# --
-# Description: Script that watches when new image (PNG or JPEG) are added and transform to WebP format.
-# --
-# Requirements: Install webp
-# Example Debian: $sudo apt install webp
-# --
-# Cron: @reboot bash-folders-image-to-webp.sh >/dev/null 2>&1 &
-# --
-
-# START
-set -e
-
-
-# FUNCTIONS
-
 usage() {
-    if [ "$*" != "" ] ; then
-        echo "Error: $*"
+    cat << EOF
+USAGE: ${0##*/} [OPTIONS] PATH
+
+Watches when new image (PNG or JPEG) are added and transform to WebP format
+
+OPTIONS:
+    -h, --help          Display this usage message and exit
+    -q, --quaity INT    Specify the compression factor between 0-100 (default: 90)
+EOF
+}
+
+require() {
+    command -v "${1}" &>/dev/null && return
+    printf '%s\n' "Missing required application: '${1}'" >&2
+    return 1
+}
+
+run() {
+    local file
+
+    set -e
+
+    mkdir --parents "${1}"
+
+    while read -r file; do
+        [[ "${file,,}" =~ \.(png|jpe?g)$ ]] || continue
+
+        printf '%s\n' "Converting file '${file}'..."
+        if ! cwebp -q "${quality}" -o "${1}/${file%.*}.webp" "${1}/${file}"; then
+            printf '%s\n' "Failed to convert file: '${file}'" >&2
+        fi
+    done < <(inotifywait --monitor --event "create" --event "moved_to" --format '%f' "${1}")
+}
+
+main() {
+    local opts quality
+
+    quality="90"
+    opts="$(getopt \
+        --options hq: \
+        --longoptions help,quality: \
+        --name "${0##*/}" \
+        -- "${@}" \
+    )"
+
+    eval set -- "${opts}"
+    while true; do
+        case "${1}" in
+            -h | --help )       usage; return 0;;
+            -q | --quality )    quality="${2}"; shift;;
+            -- )                shift; break;;
+            * )                 break;;
+        esac
+        shift
+    done
+
+    if [[ -z "${1}" ]]; then
+        printf '%s\n' "No folder specified" >&2
+        return 1
     fi
 
-    cat << EOF
-Usage: $PROGNAME [OPTION]
-Watches when new image (PNG or JPEG) are added and transform to WebP format.
-Options:
---folder [path]  Folder path where will be monitored.
---help           Display this usage message and exit
-EOF
+    require "inotifywait" || return
+    require "cwebp" || return
 
-    exit 1
+    run "${1}"
 }
 
-start() {
-    # Monitors the selected folder
-    inotifywait -m -e create,moved_to --format '%f' "$FOLDER_ORIGIN" |
-	while read -r filename; do
-	    # Gets the file extension
-	    extension="${filename##*.}"
-	    # Checks if the extension is in the extension list
-	    for ext in "${EXTENSIONS_TO_WATCH[@]}"; do
-		if [[ "$ext" = "$extension" ]]; then
-		    filename_output="${filename%.*}.webp"
-		    # Displays a flat file of information
-		    touch "$FOLDER_ORIGIN/$MESSAGE_WAITING"
-		    # Converts the image to WebP
-		    cwebp -q "$QUALITY" "$FOLDER_ORIGIN/$filename" -o "$FOLDER_ORIGIN/$filename_output"
-		    # Remove a flat file of information
-		    rm "$FOLDER_ORIGIN/$MESSAGE_WAITING"
-		fi
-	    done
-	done
-}
-
-
-# CONTROLE ARGUMENTS
-
-# Parse command line arguments
-while [[ $# -gt 0 ]]
-do
-    key="$1"
-    case $key in
-	--folder)
-	    FOLDER_ORIGIN="$2"
-	    shift # past argument
-	    shift # past value
-	    ;;
-	--quality)
-	    QUALITY="$2"
-	    shift # past argument
-	    shift # past value
-	    ;;
-	*)
-	    usage "Unknown option: $1"
-	    ;;
-    esac
-done
-
-# VARIABLES
-PROGNAME=$(basename "$0")
-QUALITY="90"
-MESSAGE_WAITING="converting_please_wait"
-EXTENSIONS_TO_WATCH=("jpg" "jpeg" "png")
-
-# CHECKS
-
-# Check if exists cwebp
-if ! which cwebp > /dev/null; then
-    echo "Error: You must install the WebP terminal tools."
-    exit 1
-fi
-
-# Check if the required --folder flag is provided
-if [ -z "$FOLDER_ORIGIN" ]; then
-    echo "Error: The --folder flag is required."
-    exit 1
-fi
-
-start
+main "${@}"
